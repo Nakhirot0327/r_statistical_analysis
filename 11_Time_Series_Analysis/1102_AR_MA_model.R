@@ -2,8 +2,8 @@
 #CREATE A FUNCTION TO MAKE AR(1) MODEL SERIES 
 AR1 <- function(n,b,a=0,sd=1,y0=0) {
   c <- rnorm(n,sd=sd) #CREATE RANDOM NUMBER WITH NORMAL DISTRIBUTION (SAMPLE NUMBER:n, STANDARD ERROR:sd)
-  y <- rep(0,n)　　　 #CREATE VECTOR TO SET SAMPLE VALUES
-  y[1] <- y0　　　　　#PLUG IN INITIAL VALUE(DEFAULT VALUE=0)
+  y <- rep(0,n)ﾂ　ﾂ　ﾂ　 #CREATE VECTOR TO SET SAMPLE VALUES
+  y[1] <- y0ﾂ　ﾂ　ﾂ　ﾂ　ﾂ　#PLUG IN INITIAL VALUE(DEFAULT VALUE=0)
   
   for(j in 1:(n-1)) {
     y[j+1] <- a + b*y[j] + c[j+1]  #CREATE AR(1) MODEL SERIES 
@@ -75,7 +75,7 @@ MA1 <- function(n,si,a=0,sd=1,y0=0) {
   e_y <- round(m,digits=2)
   
   title <- paste("MA Model y_t = a + c_t + c_t-1,a=",a,
-                 ",θ =",si,",sd =",sd,sep="")
+                 ",ﾆ津� =",si,",sd =",sd,sep="")
   yl <- c(min(y),max(y))
   plot(y,type="l",main=title)
   abline(h=e_y,col=2)
