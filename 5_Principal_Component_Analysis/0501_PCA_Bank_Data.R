@@ -38,10 +38,10 @@ for(i in 1:ncol(data)) {
 
 ####2-2 Compression of demention by PCA####
 data_s <- scale(data) #Standardization of the data
-data_cor <- cor(data)　#Correlation matrix
+data_cor <- cor(data)ﾂ　#Correlation matrix
 corrplot(data_cor) #Check correlation
 
-PC <- princomp(data_s)　#Principal component analysis(PCA)
+PC <- princomp(data_s)ﾂ　#Principal component analysis(PCA)
 summary(PC) #confrim cumulative proportion of PCA
 PC$loadings
 
