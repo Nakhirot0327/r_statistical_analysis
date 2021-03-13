@@ -1,21 +1,21 @@
-#‘½d‹¤ü«@ŽÀ—á
+#å¤šé‡å…±ç·šæ€§ã€€å®Ÿä¾‹
 multi <- read.csv("4_Multico_Sample.csv")
 head(multi)
 
 multi.lm <- lm(NumOfCar~.,data=multi)
 summary(multi.lm)
-par(mfrow=c(2,2)) #ƒOƒ‰ƒtƒŒƒCƒAƒEƒg’²®
+par(mfrow=c(2,2)) #ã‚°ãƒ©ãƒ•ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆèª¿æ•´
 plot(multi.lm)
 
-#install.packages("DAAG") #‰‰ñ‚Ì‚ÝŽÀs
+#install.packages("DAAG") #åˆå›žã®ã¿å®Ÿè¡Œ
 library(DAAG)
 vif(multi.lm)
-cor(multi) #NumOfCar‚ÆÅ‚à‘ŠŠÖŒW”‚ª‘å‚«‚¢Retailer‚Å‰ñ‹A•ªÍ
+cor(multi) #NumOfCarã¨æœ€ã‚‚ç›¸é–¢ä¿‚æ•°ãŒå¤§ãã„Retailerã§å›žå¸°åˆ†æž
 
 multi.lm2 <- lm(NumOfCar~Retailer,data=multi)
 summary(multi.lm2)
 
-#‘½d‹¤ü«‚ÌƒOƒ‰ƒt—á
+#å¤šé‡å…±ç·šæ€§ã®ã‚°ãƒ©ãƒ•ä¾‹
 library(rgl)
 s <- as.matrix(seq(0,20,length=20))
 t <- as.matrix(seq(0,20,length=20))
