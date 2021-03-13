@@ -1,11 +1,11 @@
 ##############3. CONFIRM NEGATIVE EFFECT OF UNIT ROOT PROCESS##############
 #CREATE PARAMETERS
 n <- 100      #SAMPLE NUMBER
-d <- 0@@@@#DEGREE OF ARIMA MODEL
+d <- 0ã€€ã€€ã€€ã€€#DEGREE OF ARIMA MODEL
 sig2 <- 1.2   #VARIANCE
-mu <- 0@@@ #MEAN
-beta <- 0.07@#1ST COEFFICIENT OF TREND
-phi <- c(0.5,0.3)@@@#COEFFICIENT OF AR
+mu <- 0ã€€ã€€ã€€ #MEAN
+beta <- 0.07ã€€#1ST COEFFICIENT OF TREND
+phi <- c(0.5,0.3)ã€€ã€€ã€€#COEFFICIENT OF AR
 p <- length(phi)       #DEGREE OF AR
 theta <-  c(0.3,0.2)   #COEFFICIENT OF MA
 q <- length(theta)     #DEGREE OF MA
