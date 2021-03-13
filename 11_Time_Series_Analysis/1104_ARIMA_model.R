@@ -15,11 +15,11 @@ stock <- read.csv("http://k-db.com/stocks/9984-T?download=csv",skip=1,header=TRU
 
 stockday <- matrix(stock[,1],ncol=1)
 stockdaynum <- matrix(seq(1,nrow(stock),by=1),ncol=1) #NO USE
-stockindex <- cbind(stockday,stockdaynum)@@@@@@ #NO USE
+stockindex <- cbind(stockday,stockdaynum)ã€€ã€€ã€€ã€€ã€€ã€€ #NO USE
 delete <- c(2,3,4,6,7)
-stock <- stock[,-delete]@@@@@ #DELETE COLUMNS #2,3,4,6,7 
-stock <- ts(stock,start=1,freq=1)@#CHANGE DATE TO SEQUENTIAL NUMBER
-stock <- stock[order(stock[,1]),]@#SORT BY DATE
+stock <- stock[,-delete]ã€€ã€€ã€€ã€€ã€€ #DELETE COLUMNS #2,3,4,6,7 
+stock <- ts(stock,start=1,freq=1)ã€€#CHANGE DATE TO SEQUENTIAL NUMBER
+stock <- stock[order(stock[,1]),]ã€€#SORT BY DATE
 head(stock)
 
 #POT GRAPH (Time=250 IS YESTERDAY'S CLOSING PRICE)
@@ -32,7 +32,7 @@ par(mfrow=c(1,1))
 #####STEP2:######
 #BEYOND THE SCOPE OF THIS CHAPTER
 
-#####STEP3:’PˆÊªŒŸ’è#####
+#####STEP3:å˜ä½æ ¹æ¤œå®š#####
 library(urca)
 #START FROM 'type="trend", lag=4'
 (stockACF <- summary(ur.df(stock[,2],type="trend",lag=4)))
@@ -49,21 +49,21 @@ library(urca)
 #'z.diff.lag' IS NOT SIGNIFICANT, CALCULATE AT 'lag=0'
 (stockACF <- summary(ur.df(stock[,2],type="trend",lag=0)))
 
-#P-VALUE OF 'z.lag1(=ƒÎ)' IS UNDER 0.05, SO ƒÎ=0 IS NOT TRUE(=ROOT UNIT IS NOT EXISTED)
+#P-VALUE OF 'z.lag1(=Ï€)' IS UNDER 0.05, SO Ï€=0 IS NOT TRUE(=ROOT UNIT IS NOT EXISTED)
 #IF UNIT ROOT IS EXISTED, CALCULATE SERIES DIFFERENE AND RE-RUN STEP2 UNTIL UNIT ROOT IS NOT EXISTED
 
 #####STEP4: DECIDE ARIMA MODEL COEFFICIENT REGARDING TREND#####
 #(LINEAR EXPRESSION TREND)+ARMA(p,q) 
 #EXPLAIN LATER HOW TO DECIDE 'p,q'
-x <- seq(1,length(stock[,2]),by=1)@ #Time
-stock_lm <- lm(stock[,2]~x)  @@@@#LINEAR REGRESSION
+x <- seq(1,length(stock[,2]),by=1)ã€€ #Time
+stock_lm <- lm(stock[,2]~x)  ã€€ã€€ã€€ã€€#LINEAR REGRESSION
 summary(stock_lm)                    #CONFIRM REGRESSION RESULT
-a <- stock_lm$coef[1] @@@@@@@ #CONSTANT TERM OF REGRESSION
+a <- stock_lm$coef[1] ã€€ã€€ã€€ã€€ã€€ã€€ã€€ #CONSTANT TERM OF REGRESSION
 b <- stock_lm$coef[2]                #SLOPE OF REGRESSION
-trend <- a + b*x@@@@@@@@@@ #TREND SERIES
+trend <- a + b*xã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ #TREND SERIES
 res <- stock[,2] - trend             #REMOVE TREND
 
-#CALCULATE ARIMA MODEL EXHAUSTIVELY WITH 'p=0`4, q=0`4'
+#CALCULATE ARIMA MODEL EXHAUSTIVELY WITH 'p=0ï½ž4, q=0ï½ž4'
 arima <- NULL
 k <- 1
 
@@ -73,7 +73,7 @@ AIC <- rep(0,5*5)       #VECTOR TO PLUG IN AIC
 results <- rep(0,5*5)   #VACTOR TO PLUG IN T-TEST RESULT
 
 TF <- NULL              #VARIABLE TO STORE T-TEST RESULT(TRUE/FALSE)
-cof <- NULL@@@@@@ #VARIABLE TO STORE COEFFICIENT
+cof <- NULLã€€ã€€ã€€ã€€ã€€ã€€ #VARIABLE TO STORE COEFFICIENT
 
 for (p in 0:4) {
   for (q in 0:4) {
@@ -81,8 +81,8 @@ for (p in 0:4) {
     arima[[k]] <- arima(res,order=c(p,0,q),transform.pars=FALSE)  #PLUG IN ARIMA MODEL
     AIC[k] <- arima[[k]]$aic       #AIC
     cof[[k]] <- numeric(p+q)       #PLUG IN COEFFICIENT
-    cof[[k]] <- arima[[k]]$coef@  #PLUG IN COEFFICIENT
-    V <- arima[[k]]$var.coef@     #PLUG IN STANDART ERROR
+    cof[[k]] <- arima[[k]]$coefã€€  #PLUG IN COEFFICIENT
+    V <- arima[[k]]$var.coefã€€     #PLUG IN STANDART ERROR
     t <- numeric(p+q)              #PLUG IN T-VALUE
     TF[[k]] <- rep(0,p+q)          #PLUG IN T-TEST RESULT
 
@@ -147,7 +147,7 @@ for (m in success2) {
   ahat <- arima[[m]]$resid  #RESIDUAL ERROR
   p.value <- numeric(20)    #VARIABLE TO PLUG IN P-VALUE
 
-  for(i in 1:20) {  #JUDGE RESIDUAL IS WHITE NOISE OR NOT ON EACH 'lag1`20'
+  for(i in 1:20) {  #JUDGE RESIDUAL IS WHITE NOISE OR NOT ON EACH 'lag1ï½ž20'
     result <- Box.test(ahat,lag=i,type="Ljung-Box")
     p.value[i] <- result$p.value
   }
@@ -177,8 +177,8 @@ final_arima$coef
 #PREDICT FOR TEN DAYS
 nday <- 10
 arima.pred <- predict(final_arima,n.ahead=nday)
-x <- seq(1,length(stock[,2])+nday,by=1)@   #TIME
-trend <- a + b*x@@@@@@@@@@        #TREND SERIES
+x <- seq(1,length(stock[,2])+nday,by=1)ã€€   #TIME
+trend <- a + b*xã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€        #TREND SERIES
 y <- stock[,2]
 
 write.table(stock,file="actual.csv",sep=",")
@@ -191,7 +191,7 @@ yhatl <- yhat-2*sig                  #95% PREDICTION INTERVAL
 yhatu <- yhat+2*sig                  #95% PREDICTION INTERVAL
 yhatl2 <- yhat-1*sig                 #70% PREDICTION INTERVAL
 yhatu2 <- yhat+1*sig                 #70% PREDICTION INTERVAL
-xl <- c(1,length(stock[,2])+nday) @ #USING 250 DAYS + PREDICTION 10 DAYS
+xl <- c(1,length(stock[,2])+nday) ã€€ #USING 250 DAYS + PREDICTION 10 DAYS
 yl <- c(min(y,yhatl),max(y,yhatu))
 title <- "NISSAN(7201) CLOSING PRICE"
 plot(y,type="l",main=title,xlim=xl,ylim=yl)
