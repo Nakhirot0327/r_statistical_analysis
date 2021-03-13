@@ -76,7 +76,7 @@ printcp(fit)    #PRINT xerror
 plotcp(fit) #PLOT xerror(*)
 
 #prune FUNCTION CAN MODIFY cp
-fit2 <- prune(fit, cp=fit$cptable[4,1]) #CHANGE x, y (IN cptable[x,y]) IN RESPONSE TO RESULT OF (¦)
+fit2 <- prune(fit, cp=fit$cptable[4,1]) #CHANGE x, y (IN cptable[x,y]) IN RESPONSE TO RESULT OF (ÂÂ¦)
 #CONFIRM RESULT AFTER CHANGING cp VALUE
 rpart.plot(fit2, type=4, extra=6)
 
