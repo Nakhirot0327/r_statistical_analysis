@@ -14,11 +14,11 @@ stock <- read.csv("http://k-db.com/stocks/7201-T?download=csv",skip=1,header=TRU
 
 stockday <- matrix(stock[,1],ncol=1)
 stockdaynum <- matrix(seq(1,nrow(stock),by=1),ncol=1) #NO USE
-stockindex <- cbind(stockday,stockdaynum)@@@@@@ #NO USE
+stockindex <- cbind(stockday,stockdaynum)ã€€ã€€ã€€ã€€ã€€ã€€ #NO USE
 delete <- c(2,3,4,6,7)
-stock <- stock[,-delete]@@@@@ #DELETE COLUMNS #2,3,4,6,7 
-stock <- ts(stock,start=1,freq=1)@#CHANGE DATE TO SEQUENTIAL NUMBER
-stock <- stock[order(stock[,1]),]@#SORT BY DATE
+stock <- stock[,-delete]ã€€ã€€ã€€ã€€ã€€ #DELETE COLUMNS #2,3,4,6,7 
+stock <- ts(stock,start=1,freq=1)ã€€#CHANGE DATE TO SEQUENTIAL NUMBER
+stock <- stock[order(stock[,1]),]ã€€#SORT BY DATE
 head(stock)
 
 #POT GRAPH (Time=250 IS YESTERDAY'S CLOSING PRICE)
@@ -51,15 +51,15 @@ for (p in lag) {
 }
 
 ###############1-Additional STOCK PRICE PREDICT USING RECURRENCE FORULA###############
-#Y_predictionT+1 = (1-ƒÀ)YT + ƒÀY_predictionT@...(A)
+#Y_predictionT+1 = (1-Î²)YT + Î²Y_predictionTã€€...(A)
 
 coef <- rev(c(-5:10)*0.1)
 
 for (b in coef) {
-  w <- b    #'b' MEANS 'ƒÀ' IN ABOVE RECURRENCE FORMULA
-  x <- (1-b)*stock[,2]@#'x' IS 20% OF RAW DATA
+  w <- b    #'b' MEANS 'Î²' IN ABOVE RECURRENCE FORMULA
+  x <- (1-b)*stock[,2]ã€€#'x' IS 20% OF RAW DATA
   datHAT <- filter(x,filter=w,method="recursive",init=stock[1,2])
-  #IN ABOVE FORMULA (A), x:(1-ƒÀ)YT, wFƒÀ, init:Y1
+  #IN ABOVE FORMULA (A), x:(1-Î²)YT, wï¼šÎ², init:Y1
   #CALCULATION LOGIC IS BELOW
   #datHAT[1] == stocksub[1]*0.8 + x[1]
   #datHAT[2] == datHAT[1]*0.8 + x[2]
