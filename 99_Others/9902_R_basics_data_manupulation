@@ -1,12 +1,12 @@
-#wd���t�@�C���i�[�ꏊ�ɕύX
+#wdをファイル格納場所に変更
 #getwd()
-#setwd("C:/Users/Documents/�c")�@���A�h���X���e���ύX���ĉ�����
+#setwd("C:/Users/Documents/…")　←アドレスを各自変更して下さい
 
-##########1.�f�[�^��ǂݍ���ŁA���O��t����#############
+##########1.データを読み込んで、名前を付ける#############
 x1<-data.frame(hikki=c(68,85,50,54,66),mensetsu=c(65,80,95,70,75))
 x2<-data.frame(hikki=c(35,56,25,43,70),mensetsu=c(55,65,75,50,40))
 
-xm1 <- c(mean(x1$hikki),mean(x1$mensetsu)) #mean�͕���
+xm1 <- c(mean(x1$hikki),mean(x1$mensetsu)) #meanは平均
 names(xm1) <- c("hikki","mensetsu")
 xm2 <- c(mean(x2$hikki),mean(x1$mensetsu))
 names(xm2) <- c("hikki","mensetsu")
@@ -14,89 +14,89 @@ names(xm2) <- c("hikki","mensetsu")
 xm1
 xm2
 
-##########2.web����̃f�[�^�Ǎ�,�ꕔ�̒��o#############
+##########2.webからのデータ読込,一部の抽出#############
 ats <- read.table("http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data",header=F)
 names(ats) <- c("mpg","cylinders","displacement","horsepower",                
                 "weight","acceleration","ModelYear","origin",
                 "CarName")
-ats.s <- subset(ats,ats$displacement<190) #subset�ňꕔ�𒊏o�BA$B��A�Ƃ����f�[�^��B��A�Ƃ����Ӗ�
+ats.s <- subset(ats,ats$displacement<190) #subsetで一部を抽出。A$BはAというデータのB列、という意味
 ats.s
 
-##########3.�e�[�u���f�[�^�̏W�v#############
-#install.packages("vcd") ������̂ݎ��s
+##########3.テーブルデータの集計#############
+#install.packages("vcd") ←初回のみ実行
 library(vcd)
-head(DanishWelfare) #�f�[�^�̏��6�s��\��
+head(DanishWelfare) #データの上位6行を表示
 
-tabledata <- xtabs(Freq~Alcohol+Income,data=DanishWelfare) #�W�v�f�[�^���e�[�u���`����
+tabledata <- xtabs(Freq~Alcohol+Income,data=DanishWelfare) #集計データをテーブル形式に
 tabledata
 
-#�W�v�f�[�^���[�f�[�^�ɕϊ�
+#集計データを個票データに変換
 individualdata <- data.frame(lapply(DanishWelfare,                               
                                     function(i) rep(i,DanishWelfare[,"Freq"])))
-individualdata <- individualdata[,-1]�@
+individualdata <- individualdata[,-1]　
 
-##########4.��̌���(cbind)�ƍs�̌���(rbind)#############
+##########4.列の結合(cbind)と行の結合(rbind)#############
 gakuryoku <- rbind(c(3,4,1),c(3,4,1),c(3,4,1),c(4,4,1),c(2,2,1),c(3,4,4),c(1,1,1),c(2,3,1),c(1,2,1),c(3,4,1),        
                    c(2,3,1),c(2,1,1),c(3,2,1),c(2,2,1),c(3,4,4),c(2,3,1),c(4,4,1),c(4,3,2),c(1,4,1),c(4,4,1),                   
                    c(1,1,1),c(1,4,1),c(2,3,1),c(3,4,1),c(3,4,1),c(2,4,3),c(1,1,1),c(2,3,1),c(2,3,1),c(1,1,4))
-#c(a,b,c)�́A������a,b,c�̃x�N�g��
+#c(a,b,c)は、成分がa,b,cのベクトル
 
-colnames(gakuryoku) <- list("A","B","C") #��ɖ��O�ƕt����
-id <- c(1:30) #1:30�́A1����30�܂ł̐���
-gakuryoku <- cbind(id,gakuryoku) #id��gakuryoku����������
+colnames(gakuryoku) <- list("A","B","C") #列に名前と付ける
+id <- c(1:30) #1:30は、1から30までの整数
+gakuryoku <- cbind(id,gakuryoku) #idとgakuryokuを結合する
 gakuryoku
 
-#2-4��ڂ̐��l�𐔒l����J�e�S���J���f�[�^�ɕϊ�����
+#2-4列目の数値を数値からカテゴリカルデータに変換する
 A <- factor(gakuryoku[,2], level=c(1:4), labels=c("A1","A2","A3","A4"))
 B <- factor(gakuryoku[,3], level=c(1:4), labels=c("B1","B2","B3","B4"))
 C <- factor(gakuryoku[,4], level=c(1:4), labels=c("C1","C2","C3","C4"))
 summary(gakuryoku[,2:4])
-#A,B,C�̕��ϓ��̃T�}���f�[�^��������
-#gakuryoku[a,b]�́Agakuryoku�Ƃ����s���a�sb��̐������Ӗ�����
-#[,2]�̂悤�ɕЕ����ȗ�����ƁA2��ڑS�́A�Ƃ����Ӗ��ɂȂ�
+#A,B,Cの平均等のサマリデータが得られる
+#gakuryoku[a,b]は、gakuryokuという行列のa行b列の成分を意味する
+#[,2]のように片方を省略すると、2列目全体、という意味になる
 
-##########5.�s�{�b�g�e�[�u���̍쐬#############
+##########5.ピボットテーブルの作成#############
 install.packages("reshape2")
 library(reshape2)
 head(tips)
-attributes(tips) #�e��ǂ̂悤�ȃp�^�[��������̂��m�F
+attributes(tips) #各列どのようなパターンがあるのか確認
 
-#�s�{�b�g�e�[�u���@�����낢������������Ď������Ă݂ĉ�����
+#ピボットテーブル　※いろいろ引数をかえて実験してみて下さい
 acast(melt(tips, id.var=c("sex","day","time"),           
            measure.var="tip"),sex + time ~ day, sum, margins = FALSE)
 
-##########6.�e�[�u���̃}�[�W#############
+##########6.テーブルのマージ#############
 a <- data.frame(ID=c("a","a","a","b","b","b","c","c","c"),mz=c(1:9))
 b <- data.frame(ID=c("b","c","d"),Risk=c(1:3))
 table <- merge(b,a,by="ID")
 
-##########7.���ёւ�#############
+##########7.並び替え#############
 head(table)
 attributes(table)
-table <- table[order(-table$Risk),] #�~��
+table <- table[order(-table$Risk),] #降順
 table
 
-table <- table[order(table$Risk),] #����
+table <- table[order(table$Risk),] #昇順
 table
 
-##########8.�s�v�ȗ���폜����#############
+##########8.不要な列を削除する#############
 head(table)
 delete <- c(1,3)
 table <- table[,-delete]
 
-##########9.�����l������,0�Œu��������#############
+##########9.欠損値を除く,0で置き換える#############
 a <- c(1, 2, NA, 4, 5, NA)
 a[!is.na(a)]
 a <- ifelse(is.na(a), 0, a)
 
-##########10.for��(�J��Ԃ�����)/if��#############
+##########10.for文(繰り返し処理)/if文#############
 X <- NULL
 K <- c(0.5, 1, 2, 5, 10)
 col <- c("Red", "blue", "green", "black", "yellow")
 
 for (j in K) {  
   for (i in 1:8) {
-    X[i] <- j^i / gamma(i+1) * exp(-j)  #gamma�̓K���}�֐�
+    X[i] <- j^i / gamma(i+1) * exp(-j)  #gammaはガンマ関数
   }
   par(new=T)
   if (j == 10) {
