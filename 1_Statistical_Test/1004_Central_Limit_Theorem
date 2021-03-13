@@ -1,24 +1,24 @@
-######1.���S�Ɍ��藝�Ƒ吔�̖@���̊m�F######
+######1.中心極限定理と大数の法則の確認######
 library(MASS) #for truehist()
 
-#�菇1:��l�����̐���
+#手順1:一様乱数の生成
 data <- c(4000,6500,10000,7500,20000,3000,25000,1500,8000,4000,
           5000,5000,15000,4500,1500,3000,30000,6000,1500)
-truehist(data,prob=FALSE) #�ϑ��f�[�^�̕��z
+truehist(data,prob=FALSE) #観測データの分布
 n <- 10^5
-x <- runif(n) #��l�����̐���
+x <- runif(n) #一様乱数の生成
 
-#�菇2:�Ώۂ̃f�[�^�̖��x���z�����߂�
+#手順2:対象のデータの密度分布を求める
 d <- density(data,cut=0)
 
-#�菇3:�ϑ��f�[�^�̃N�I���^�C������V���~���[�V�����f�[�^�𐶐�
+#手順3:観測データのクオンタイルからシュミレーションデータを生成
 simx <- quantile(data,x)
-truehist(simx,prob=FALSE) #���������f�[�^�̕��z
+truehist(simx,prob=FALSE) #生成したデータの分布
 
-#�m�����x�̔�r
+#確率密度の比較
 sim.d <- density(simx,cut=0)
 maxy <- max(d$y,sim.d$y)
-plot(d,type="l",ylim=c(0,maxy),xlab="price",ylab="density",main=paste("�m�����x�̔�r"))
+plot(d,type="l",ylim=c(0,maxy),xlab="price",ylab="density",main=paste("確率密度の比較"))
 lines(sim.d,type="l",col=2)
 legend("topright", legend=c("observed", "simulated"), lty=1, col=1:2)
 
