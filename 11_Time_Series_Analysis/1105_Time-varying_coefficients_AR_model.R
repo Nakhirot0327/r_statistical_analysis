@@ -1,5 +1,5 @@
-##############6.����AR���f���ɂ�銔���\��##############
-######�f�[�^�̎�荞�݂Ɛ��`,�}��######
+##############6.時変ARモデルによる株価予測##############
+######データの取り込みと整形,図示######
 stock <- read.csv("http://k-db.com/site/jikeiretsu.aspx?c=7201-T&hyouji=&download=csv",skip=1,header=TRUE)
 
 stockday <- matrix(stock[,1],ncol=1)
@@ -21,38 +21,38 @@ stocksub <- ts(stocksub,start=1,freq=1)
 
 par(mfrow=c(2,1),ps=15)
 ts.plot(stock[,2],type="l",col=1,lty=1,
-        main="���Y������(7201)�̊���(�I�l)120730-130802",
-        ylab="����(�~)")
+        main="日産自動車(7201)の株価(終値)120730-130802",
+        ylab="株価(円)")
 ts.plot(stocksub[,2],type="l",col=1,lty=1,
-        main="���Y������(7201)�̊���(�I�l)120730-130802(�K��1)",
-        ylab="�K��(�~)")
+        main="日産自動車(7201)の株価(終値)120730-130802(階差1)",
+        ylab="階差(円)")
 par(mfrow=c(1,1))
 
-#�f�[�^��N�����߂�
+#データ数Nを求める
 ND <- length(stocksub[,2])
 range(stocksub[,2])
 
-#�ȉ��̕��͑Ώۂ��K���n��Ɍ��肷�邽�߁A�ϐ��̓��ꊷ��
+#以下の分析対象を階差系列に限定するため、変数の入れ換え
 stock <- stocksub[,2]
 
 ####Preparation for maximizing likelihood and optimization(Defining functions)#####
-#�I�v�V�����̐ݒ�
+#オプションの設定
 limy <- 1e3
-MJ <- 10�@�@�@    #�ݒ肵����AR���f���̎����̍ő�l
-NF <- 30          #���σX�y�N�g���̎��g���̊K����
-Mn <- 20          #���ϋ����U�֐��̍ő僉�O
-IT <- 5           #�������̌����l�̕��ϒl����͑ΏۂƂ���ꍇ�ɁA���ς̌v�Z�ɗp���錴���l�̌�
-N <- trunc(ND/IT) #������
-NO <- ND - IT*N   #�]��
+MJ <- 10　　　    #設定したいARモデルの次数の最大値
+NF <- 30          #時変スペクトルの周波数の階級数
+Mn <- 20          #時変共分散関数の最大ラグ
+IT <- 5           #いくつかの原数値の平均値を解析対象とする場合に、平均の計算に用いる原数値の個数
+N <- trunc(ND/IT) #周期数
+NO <- ND - IT*N   #余り
 
 if (NO > 0) {
   N <- N + 1
 }
 
-y <- numeric(N)       #�������̕��ς̊i�[�X�y�[�X
+y <- numeric(N)       #周期毎の平均の格納スペース
 NN <- 0
 
-for (i in 1:(N-1)) {  #�������̕��ς��v�Z���A�i�[
+for (i in 1:(N-1)) {  #周期毎の平均を計算し、格納
   c <- 0
   for (j in 1:IT) {
     NN <- NN + 1
@@ -62,13 +62,13 @@ for (i in 1:(N-1)) {  #�������̕��ς��v�Z���A�i�[
 }
 c <- 0
 
-for (j in 1:(ND-(N-1)*IT)) { #�Ō�(��N����)�̕��ς��v�Z���A�i�[
+for (j in 1:(ND-(N-1)*IT)) { #最後(第N周期)の平均を計算し、格納
   NN <- NN + 1
   c <- c + stock[NN]
 }
 y[N] <- c/(ND-(N-1)*IT)
 
-#�s��̐ݒ�
+#行列の設定
 FGset <- function(q,k) {
   if (k == 1) {
     m <- q
@@ -85,7 +85,7 @@ FGset <- function(q,k) {
   return(list(m=m,MatF=F,MatG=G))
 }
 
-#AR�W�����玩�ȋ����U�֐����v�Z����
+#AR係数から自己共分散関数を計算する
 AUTCOR <- function(al,SIG2,q,Mn) {
   n <- q + 1
   M <- max(q,Mn) + 1
@@ -118,7 +118,7 @@ AUTCOR <- function(al,SIG2,q,Mn) {
   return(scv)
 }
 
-#AR�W������PARCOR���v�Z����
+#AR係数からPARCORを計算する
 PARCOR <- function(al,q) {
   if (q == 1) {
     par <- al
@@ -144,7 +144,7 @@ PARCOR <- function(al,q) {
   return(par)
 }
 
-#���U�t�[���G�ϊ�(Goertzel�@)
+#離散フーリエ変換(Goertzel法)
 FOURIE <- function(x,N,NF) {
   FC <- numeric(NF)
   FS <- numeric(NF)
@@ -166,7 +166,7 @@ FOURIE <- function(x,N,NF) {
   return(list(FC=FC,FS=FS))
 }
 
-#AR���f���̃X�y�N�g��
+#ARモデルのスペクトル
 ARSP <- function(TAU2,al,q,NF) {
   h <- numeric(50)
   h[1] <- 1
@@ -181,27 +181,27 @@ ARSP <- function(TAU2,al,q,NF) {
   return(LSP)
 }
 
-#�J���}���t�B���^�̊֐�
+#カルマンフィルタの関数
 KF1 <- function(y,XFO,VFO,F,G,Q,R,limy,ISW,OSW,m,q,N) {
   if(OSW == 1) {
-    XPS <- matrix(0,m,N)  #����xn|n-1���i�[����s��
-    XFS <- matrix(0,m,N)  #����xn|n���i�[����s��
-    VPS <- array(dim=c(m,m,N)) #���U�����U�s��vn|n-1���i�[����z��
-    VFS <- array(dim=c(m,m,N)) #���U�����U�s��vn|n���i�[����z��
+    XPS <- matrix(0,m,N)  #平均xn|n-1を格納する行列
+    XFS <- matrix(0,m,N)  #平均xn|nを格納する行列
+    VPS <- array(dim=c(m,m,N)) #分散共分散行列vn|n-1を格納する配列
+    VFS <- array(dim=c(m,m,N)) #分散共分散行列vn|nを格納する配列
   }
   XF <- XFO #x0|0
   VF <- VFO #v0|0
-  NSUM <- 0 #�t�B���^�̎��s�񐔃J�E���^�[
-  SIG2 <- 0 #���U�W���̍Ŗސ���l(�̏����l)
-  LDET <- 0 #�ő�ΐ��ޓx�̑�2��(�̏����l)
+  NSUM <- 0 #フィルタの実行回数カウンター
+  SIG2 <- 0 #分散係数の最尤推定値(の初期値)
+  LDET <- 0 #最大対数尤度の第2項(の初期値)
   for(n in 1:N) {
-    #1����\��
-    XP <- F %*% XF #xn-1|n-1����xn|n-1�����߂�
-    VP <- F %*% VF %*% t(F) + G %*% Q %*% t(G) #Vn-1|n-1����Vn|n-1�����߂�
-    #�t�B���^
-    if(y[n] < limy) { #y[i]������l(limy)�𒴂��Ă��Ȃ��ꍇ
+    #1期先予測
+    XP <- F %*% XF #xn-1|n-1からxn|n-1を求める
+    VP <- F %*% VF %*% t(F) + G %*% Q %*% t(G) #Vn-1|n-1からVn|n-1を求める
+    #フィルタ
+    if(y[n] < limy) { #y[i]が上限値(limy)を超えていない場合
       H <- matrix(0,1,m)
-      for (i in 1:q) { #yn-1,yn-2,�c,yn-m�̒l��H�Ɋi�[����
+      for (i in 1:q) { #yn-1,yn-2,…,yn-mの値をHに格納する
         n0 <- n-i
         if (n0 > 0) {
           if (y[n0] < limy) {
@@ -209,46 +209,46 @@ KF1 <- function(y,XFO,VFO,F,G,Q,R,limy,ISW,OSW,m,q,N) {
           }
         }
       }
-      NSUM <- NSUM + 1�@�@�@�@�@�@#�t�B���^�̎��s�񐔂̃J�E���g
-      B <- H %*% VP %*% t(H) + R�@#yn�̕��U�����U�s��
-      B1 <- solve(B)�@�@�@�@�@�@�@#B�̋t�s������߂�
-      K <- VP %*% t(H) %*% B1     #K�̓J���}���Q�C��
-      e <- y[n] - H %*% XP�@�@�@�@#yn�̗\���덷
-      XF <- XP + K %*% e�@�@�@�@�@#xn|n-1��yn�̗\���덷����xn|n�����߂�
-      VF <- VP - K %*% H %*% VP�@ #Vn|n-1����Vn|n�����߂�
-      SIG2 <- SIG2 + t(e) %*% B1 %*% e�@#SIG2�̍Ŗސ���l
-      LDET <- LDET + log(det(B))        #�ő�ΐ��ޓx�̑�2���̌v�Z
-    } else { #y[i]������l(limy)�𒴂��Ă���ꍇ
-      XF <- XP�@#xn|n=xn|n-1�Ƃ���
-      VF <- VP�@#vn|n=vn|n-1�Ƃ���
+      NSUM <- NSUM + 1　　　　　　#フィルタの実行回数のカウント
+      B <- H %*% VP %*% t(H) + R　#ynの分散共分散行列
+      B1 <- solve(B)　　　　　　　#Bの逆行列を求める
+      K <- VP %*% t(H) %*% B1     #Kはカルマンゲイン
+      e <- y[n] - H %*% XP　　　　#ynの予測誤差
+      XF <- XP + K %*% e　　　　　#xn|n-1とynの予測誤差からxn|nを求める
+      VF <- VP - K %*% H %*% VP　 #Vn|n-1からVn|nを求める
+      SIG2 <- SIG2 + t(e) %*% B1 %*% e　#SIG2の最尤推定値
+      LDET <- LDET + log(det(B))        #最大対数尤度の第2項の計算
+    } else { #y[i]が上限値(limy)を超えている場合
+      XF <- XP　#xn|n=xn|n-1とする
+      VF <- VP　#vn|n=vn|n-1とする
     }
-    if (OSW == 1) {�@#OSW==1:��ԃt�B���^���z���v�Z����ꍇ
-      XPS[,n] <- XP  #xn|n-1���i�[
-      XFS[,n] <- XF  #xn|n���i�[
-      VPS[,,n] <- VP #vn|n-1���i�[
-      VFS[,,n] <- VF #vn|n���i�[
+    if (OSW == 1) {　#OSW==1:状態フィルタ分布を計算する場合
+      XPS[,n] <- XP  #xn|n-1を格納
+      XFS[,n] <- XF  #xn|nを格納
+      VPS[,,n] <- VP #vn|n-1を格納
+      VFS[,,n] <- VF #vn|nを格納
     }
   }
   SIG2 <- SIG2/NSUM
   if (ISW == 0) {  
-    FF <- -0.5 * (NSUM * (log(2*pi*SIG2)+1)+LDET) #SIG2�𖢒m�p�����[�^�Ƃ��čŖސ��肷��ꍇ�̍ő�ΐ��ޓx
+    FF <- -0.5 * (NSUM * (log(2*pi*SIG2)+1)+LDET) #SIG2を未知パラメータとして最尤推定する場合の最大対数尤度
   } else {
-    FF <- -0.5 * (NSUM * (log(2*pi)+SIG2)+LDET) #SIG2�����^�̒l�Ƃ����ꍇ�̍ő�ΐ��ޓx
+    FF <- -0.5 * (NSUM * (log(2*pi)+SIG2)+LDET) #SIG2を所与の値とした場合の最大対数尤度
   }
-  if (OSW == 0) {�@#OSW==0:�ő�ΐ��ޓx���v�Z����ꍇ
+  if (OSW == 0) {　#OSW==0:最大対数尤度を計算する場合
     return(list(LLF=FF,Ovar=SIG2))
   }
-  if (OSW == 1) {�@#OSW==1:��ԃt�B���^���z���v�Z����ꍇ
+  if (OSW == 1) {　#OSW==1:状態フィルタ分布を計算する場合
     return(list(XPS=XPS,XFS=XFS,VPS=VPS,VFS=VFS,Ovar=SIG2))
   }
 }
 
-#�������̊֐�
+#平滑化の関数
 SMO1 <- function(XPS,XFS,VPS,VFS,F,GSIG2,m,q,N) {
-  XSS <- matrix(0,m,N) �@�@�@�@#�������̌��ʂ̂���,Xn|N���i�[����X�y�[�X
-  VSS <- array(dim=c(m,m,N))�@ #�������̌��ʂ̂���,Vn|N���i�[����X�y�[�X
-  XS1 <- XFS[,N]  �@�@�@�@�@�@ #xN|N��XS1�ɑ��
-  VS1 <- VFS[,,N]              #VN|N��VS1�ɑ��
+  XSS <- matrix(0,m,N) 　　　　#平滑化の結果のうち,Xn|Nを格納するスペース
+  VSS <- array(dim=c(m,m,N))　 #平滑化の結果のうち,Vn|Nを格納するスペース
+  XS1 <- XFS[,N]  　　　　　　 #xN|NをXS1に代入
+  VS1 <- VFS[,,N]              #VN|NをVS1に代入
   XSS[,N] <- XS1
   VSS[,,N] <- VS1
   for (n1 in 1:(N-1)) {
@@ -257,25 +257,25 @@ SMO1 <- function(XPS,XFS,VPS,VFS,F,GSIG2,m,q,N) {
     XF <- XFS[,n]              #XN-n|N
     VP <- VPS[,,n+1]           #VN-n+1|N
     VF <- VFS[,,n]             #VN-n|N
-    VPI <- solve(VP)           #VN-n+1|N�̋t�s��
-    A <- VF %*% t(F) %*% VPI              #AN = Vn|n * F^t_n+1 * F^-1n+1|n�ɑΉ�
-    XS2 <- XF + A %*% (XS1 - XP)          #Xn|N = xn|n + An (xn+1|N - xn+1|n)�ɑΉ�
-    VS2 <- VF + A %*% (VS1 - VP) %*% t(A) #Vn|N = Vn|n + An (Vn+1|N - Vn+1|n)*A^t_n�ɑΉ�
-    XS1 <- XS2                 #���̉�ɔ�����XS1������Ă���
-    VS1 <- VS2                 #���̉�ɔ�����VS1������Ă���
-    XSS[,n] <- XS1�@�@         #Xn|N���i�[
-    VSS[,,n] <- VS1�@          #Vn|N���i�[
+    VPI <- solve(VP)           #VN-n+1|Nの逆行列
+    A <- VF %*% t(F) %*% VPI              #AN = Vn|n * F^t_n+1 * F^-1n+1|nに対応
+    XS2 <- XF + A %*% (XS1 - XP)          #Xn|N = xn|n + An (xn+1|N - xn+1|n)に対応
+    VS2 <- VF + A %*% (VS1 - VP) %*% t(A) #Vn|N = Vn|n + An (Vn+1|N - Vn+1|n)*A^t_nに対応
+    XS1 <- XS2                 #次の回に備えてXS1を作っておく
+    VS1 <- VS2                 #次の回に備えてVS1を作っておく
+    XSS[,n] <- XS1　　         #Xn|Nを格納
+    VSS[,,n] <- VS1　          #Vn|Nを格納
   }
-  arc <- matrix(0,q,N)�@�@�@�@ #Xn|N���i�[������ꕨ
-  arv <- array(dim=c(q,q,N))   #Vn|N���i�[������ꕨ
+  arc <- matrix(0,q,N)　　　　 #Xn|Nを格納する入れ物
+  arv <- array(dim=c(q,q,N))   #Vn|Nを格納する入れ物
   for (n in 1:N) {
-    arc[,n] <- XSS[1:q,n]      #Xn|N(n=1,2,�c,N-1)�̌��ʂ��i�[
-    arv[,,n] <- GSIG2 * VSS[1:q,1:q,n]  #Vn|N(n=1,2,�c,N-1)�̌��ʂ��i�[
+    arc[,n] <- XSS[1:q,n]      #Xn|N(n=1,2,…,N-1)の結果を格納
+    arv[,,n] <- GSIG2 * VSS[1:q,1:q,n]  #Vn|N(n=1,2,…,N-1)の結果を格納
   }
   return(list(arc=arc, arv=arv))
 }
 
-#TAU2�̑ΐ��ޓx�֐��̒�`
+#TAU2の対数尤度関数の定義
 LogL <- function(theta,y,limy,q,k,N) {
   TAU2 <- theta
   MAT <- FGset(q,k)
@@ -342,14 +342,14 @@ print(STAU2)
 print(k)
 print(q)
 
-#����PARCOR�̌v�Z
+#時変PARCORの計算
 PAR <- matrix(0,q,N)
 for (n in 1:N) {
   al <- arc[,n]
   PAR[,n] <- PARCOR(al,q)
 } 
 
-#����PARCOR�̃O���t�쐬
+#時変PARCORのグラフ作成
 t <- c(1:N)
 xt <- PAR[1,]
 par(mfrow=c(1,3),oma=c(0,0,0,0)+0.1,mar=c(4,4,2,2)+0.1)
@@ -364,7 +364,7 @@ xt <- PAR[3,]
 plot(t,xt,xlim=range(t),ylim=c(-1,1),type="l",main="(c)",
      xlab="time",ylab="PARCOR",lwd=2)
 
-#���σX�y�N�g���̌v�Z##########
+#時変スペクトルの計算##########
 N1 <- N/6
 TVSP <- matrix(0,NF,N1)
 for (n1 in 1:N1) {
@@ -373,7 +373,7 @@ for (n1 in 1:N1) {
   TVSP[,n1] <- ARSP(SIG2,al,q,NF)
 }
 
-#���σX�y�N�g���̃O���t�쐬
+#時変スペクトルのグラフ作成
 t <- 6*c(1:N1)
 fr <- 0.5*c(1:NF)/NF
 
@@ -384,7 +384,7 @@ persp(fr,t,z,theta=45,phi=30,xlab="frequency",ylab="time",
       zlab="p(f)",main="(a)")
 contour(fr,t,z,main="(b)",xlab="frequency",ylab="time")
 
-#���ώ��ȋ����U�֐��̌v�Z
+#時変自己共分散関数の計算
 N1 <- N/6
 M <- max(q,Mn) + 1
 AUC <- matrix(0,M,N1)
@@ -394,7 +394,7 @@ for (n1 in 1:N1) {
   AUC[,n1] <- AUTCOR(al,SIG2,q,Mn)
 }
 
-#���ώ��ȋ����U�֐��̃O���t�쐬
+#時変自己共分散関数のグラフ作成
 library(lattice)
 par(mfrow=c(1,2),oma=c(0,0,0,0)+0.1,mar=c(4,4,3,2)+0.1)
 t <- 6*c(1:N1)
