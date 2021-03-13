@@ -1,4 +1,4 @@
-######2.ŽÀŒ±Œv‰æ–@######
+######2.Å½Ã€Å’Â±Å’vâ€°Ã¦â€“@######
 #Practice 1
 #Design of Experiment ?Credit Card for Developing Country?
 
