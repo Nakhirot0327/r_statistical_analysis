@@ -175,4 +175,4 @@ R_sq <- R^2 #CALCULATE R-SQUARED
 sprintf("R: %4.3f, R^2: %4.3f", R, R_sq)  #PRINT R AND R-SQUARED
 
 ## (F) Variable of Importance
-varImpPlot(rf,main="Variable importance") #Variable Improtance‚ÌƒOƒ‰ƒt
+varImpPlot(rf,main="Variable importance") #Variable Improtanceâ€šÃŒÆ’OÆ’â€°Æ’t
