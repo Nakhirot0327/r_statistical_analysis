@@ -164,7 +164,7 @@ printcp(fit)    #PRINT xerror
 plotcp(fit) #PLOT xerror(*)
 
 #RECREATE DECISION TREE TO USE prune FUNCTION WITH ADEQUATE cp
-fit2 <- prune(fit, cp=fit$cptable[3,1]) #CHANGE x, y (IN cptable[x,y]) IN RESPONSE TO RESULT OF (窶?��)
+fit2 <- prune(fit, cp=fit$cptable[3,1]) #CHANGE x, y (IN cptable[x,y]) IN RESPONSE TO RESULT OF (çª¶?½»)
 ##PLOT DECISION TREE AFTER CHANGING cp
 rpart.plot(fit2, type=4, extra=1, cex=2)
 
